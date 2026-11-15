@@ -34,7 +34,7 @@ async function load() {
 
 function draw() {
   const rooms = [...new Set(players.map(p => p.room))].sort();
-  const list = players.filter(p => !room || p.room === room).sort((a, b) => (a.room + String(a.number).padStart(3, '0')).localeCompare(b.room + String(b.number).padStart(3, '0')));
+  const list = players.filter(p => room ? p.room === room : !G.isTeacher(p)) // บัญชีครูไม่นับรวมในสถิติห้อง.sort((a, b) => (a.room + String(a.number).padStart(3, '0')).localeCompare(b.room + String(b.number).padStart(3, '0')));
   const R = list.map(row);
   const active7 = list.filter(p => G.now() - lastActive(p) <= 7 * 864e5).length;
   const avgM = R.length ? Math.round(R.reduce((s, r) => s + r.avg, 0) / R.length) : 0;

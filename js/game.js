@@ -183,16 +183,20 @@ export function stageState(p, id) { return p.progress[id] || { plays: 0 }; }
 export function stageDone(p, id) { return (p.progress[id]?.plays || 0) > 0; }
 export function worldStages(worldId) { return STAGES.filter(s => s.world === worldId); }
 
+// บัญชีครู: แถวในชีต Students ที่ช่อง "ห้อง" เป็น "ครู" ปลดล็อกทุกโลก ทุกด่าน ทุกบอส
+export function isTeacher(p) { return String(p?.room || '').trim() === 'ครู'; }
+
 export function stageOpen(p, stage) {
+  if (isTeacher(p)) return true;
   const list = worldStages(stage.world);
   const i = list.indexOf(stage);
   return i === 0 || stageDone(p, list[i - 1].id);
 }
-export function bossOpen(p, worldId) { return worldStages(worldId).every(s => stageDone(p, s.id)); }
+export function bossOpen(p, worldId) { return isTeacher(p) || worldStages(worldId).every(s => stageDone(p, s.id)); }
 
 export function worldUnlock(p, world, settings) {
   if (!world.playable) return { ok: false, checks: [{ label: world.note, ok: false }] };
-  if (!world.unlock) return { ok: true, checks: [] };
+  if (!world.unlock || isTeacher(p)) return { ok: true, checks: [] };
   const prev = world.unlock.world;
   const checks = [
     { label: `XP สะสม ${settings.w3Xp.toLocaleString()} ขึ้นไป (ตอนนี้ ${p.xp.toLocaleString()})`, ok: p.xp >= settings.w3Xp },
