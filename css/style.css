@@ -145,6 +145,17 @@ input, select { font: inherit; padding: 9px 10px; border: 0; background: #fffaf0
 .node.boss { background: #ffd9cf; }
 .tag { font-size: .72rem; padding: 0 6px; font-family: Mitr; margin-right: 4px; color: #fff; }
 .t-manga { background: var(--leaf2); } .t-sheet { background: var(--blue); } .t-game { background: var(--purple); }
+.t-lesson { background: var(--green); } .t-trial { background: var(--red); }
+.lesson { background: #fffaf0; padding: 16px 18px; margin: var(--px); box-shadow: 0 0 0 3px #c9ad74; font-size: 1.02rem; }
+.lesson h3 { color: var(--wood2); margin-top: .9em; }
+.lesson h3:first-child { margin-top: 0; }
+.lesson ul, .lesson ol { padding-left: 22px; }
+.lesson li { margin: 4px 0; }
+.lesson .tbl td, .lesson .tbl th { border-bottom: 2px dashed #e0cfa6; }
+.tl { display: flex; flex-wrap: wrap; gap: 0; margin: 12px 0; }
+.tl span { position: relative; flex: 1 1 120px; background: var(--leaf); padding: 8px 18px 8px 12px; font-family: Mitr; margin: 3px 6px 3px 0; box-shadow: 0 0 0 3px var(--woodD); text-align: center; font-size: .9rem; }
+.tl span:nth-child(even) { background: #9fd98a; }
+.world .nocover { font-family: Mitr; font-size: 1.2rem; color: var(--wood2); background: var(--paper2); text-align: center; padding: 4px; }
 
 .books { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
 .book { background: #fff7e3; color: var(--ink); font: inherit; text-align: left; padding: 10px; margin: var(--px); cursor: pointer; display: flex; flex-direction: column; gap: 4px; }

@@ -151,6 +151,68 @@ const BOSS = {
   },
 };
 
+// บอสโลก 2: นาฬิกาพันปี · โลก 6: เงาแห่งความลืม · โลก 4 และ 5 ใช้แบบเดิมเปลี่ยนสี
+BOSS.clockKeeper = {
+  pal: { k: '#1b1420', b: '#b8863b', d: '#7a5520', l: '#e6c27a', w: '#fff7e0', h: '#3b2414', r: '#d64541', e: '#5ef0ff' },
+  grid: [
+    '........................',
+    '.........kkkkkk.........',
+    '.......kkbbbbbbkk.......',
+    '.....kkbbllllllbbkk.....',
+    '....kbblwwwwwwwwlbbk....',
+    '...kbbwwwwwhwwwwwwbbk...',
+    '...kblwwwwwhwwwwwwlbk...',
+    '..kbbwwewwwhwwwwewwbbk..',
+    '..kblwwwwwwhwwwwwwwlbk..',
+    '..kblwwwwwwhhhhhhwwlbk..',
+    '..kblwwwwwwwwwwwwwwlbk..',
+    '..kbbwwewwwwwwwwewwbbk..',
+    '...kblwwwwwwwwwwwwlbk...',
+    '...kbbwwwwwrrwwwwwbbk...',
+    '....kbblwwwwwwwwlbbk....',
+    '.....kkbbllllllbbkk.....',
+    '.......kkbbbbbbkk.......',
+    '........kdddddddk.......',
+    '.....kkkdbbbbbbdkkk.....',
+    '....kbbkdbbbbbbdkbbk....',
+    '....kbk.kdddddk..kbk....',
+    '....kbk..kbbbk...kbk....',
+    '...kkkk.kkkkkkk.kkkk....',
+    '........................',
+  ],
+};
+BOSS.shadow = {
+  pal: { k: '#0b0710', s: '#2b2140', m: '#3f3160', l: '#5b4a85', e: '#ff5e7a', w: '#d9d0f0' },
+  grid: [
+    '........................',
+    '.........kkkkkk.........',
+    '.......kksmmmmskk.......',
+    '......kssmmlllmmssk.....',
+    '.....ksmmllllllmmsk.....',
+    '....ksmmllllllllmmsk....',
+    '....ksmleelllleelmsk....',
+    '....ksmleelllleelmsk....',
+    '....ksmmllllllllmmsk....',
+    '....ksmmlllwwlllmmsk....',
+    '...kssmmmllwwllmmmssk...',
+    '..ksmmmmmmmllmmmmmmmsk..',
+    '.ksmmsmmmmmmmmmmmsmmmsk.',
+    '.ksmskmmmmmmmmmmmmksmsk.',
+    'ksmsk.kmmmmmmmmmmk.ksmsk',
+    'kssk..ksmmmmmmmmsk..kssk',
+    '.kk...ksmmmmmmmmsk...kk.',
+    '......ksmmmmmmmmsk......',
+    '......kssmmmmmmssk......',
+    '.......ksmsmmsmsk.......',
+    '.......ks.ksk.ksk.......',
+    '........k..k...k........',
+    '........................',
+    '........................',
+  ],
+};
+BOSS.goldGuardian = { grid: BOSS.stoneGuardian.grid, pal: { k: '#2a1a08', g: '#d9a83a', d: '#9a6a1a', l: '#ffe08a', r: '#ff6b3a', m: '#6b4a2b' } };
+BOSS.celadonPot = { grid: BOSS.potGiant.grid, pal: { k: '#14261c', o: '#8fc9a8', d: '#5a9a7a', l: '#c4ecd4', e: '#3b2414', r: '#2f6b55' } };
+
 const CHEST = [
   '..kkkkkkkkkk..',
   '.kccccccccccck',

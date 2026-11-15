@@ -200,9 +200,12 @@ export function bossOpen(p, worldId) { return isTeacher(p) || worldStages(worldI
 export function worldUnlock(p, world, settings) {
   if (!world.playable) return { ok: false, checks: [{ label: world.note, ok: false }] };
   if (!world.unlock || isTeacher(p)) return { ok: true, checks: [] };
+  // เคยเล่นโลกนี้แล้ว ไม่ล็อกกลับ
+  if (worldStages(world.id).some(s => stageDone(p, s.id))) return { ok: true, checks: [] };
   const prev = world.unlock.world;
+  const need = Number(settings[`w${world.id}Xp`] ?? world.unlock.xp ?? 0);
   const checks = [
-    { label: `XP สะสม ${settings.w3Xp.toLocaleString()} ขึ้นไป (ตอนนี้ ${p.xp.toLocaleString()})`, ok: p.xp >= settings.w3Xp },
+    { label: `XP สะสม ${need.toLocaleString()} ขึ้นไป (ตอนนี้ ${p.xp.toLocaleString()})`, ok: p.xp >= need },
     { label: `ชนะบอสโลกที่ ${prev}`, ok: !!p.bossWins['boss' + prev] },
     { label: `ความเชี่ยวชาญโลกที่ ${prev} อย่างน้อย ${settings.masteryGate}% (ตอนนี้ ${worldMastery(p, prev)}%)`, ok: worldMastery(p, prev) >= settings.masteryGate },
   ];
@@ -217,16 +220,21 @@ export function completeStage(p, stage, { correct = 0, total = 0, score = 0 }) {
   if (stage.kind === 'game') {
     const good = score >= 80;
     r = { xp: (good ? 60 : 30) * f, coins: Math.round((good ? 15 : 5) * f), chest: good && st.plays === 0 ? 'silver' : null, materials: f > 0 ? 1 : 0 };
+  } else if (stage.kind === 'trial') {
+    const pass = correct >= Math.ceil(total * 0.6);
+    r = { xp: (40 + 25 * correct) * f, coins: Math.round((10 + 5 * correct) * f), materials: f > 0 ? 2 : 0,
+      chest: st.plays === 0 && pass ? (stage.secret && correct >= total - 1 ? 'legend' : 'silver') : null };
   } else {
     const base = stage.kind === 'manga' ? 50 : 40;
+    const big = stage.kind === 'sheet' || stage.kind === 'lesson';
     r = { xp: (base + 30 * correct) * f, coins: Math.round((10 + 5 * correct) * f), materials: f > 0 ? 1 : 0,
-      kn: st.plays === 0 ? (stage.kind === 'sheet' ? 2 : 1) : 0,
-      chest: st.plays === 0 ? (stage.kind === 'sheet' ? 'iron' : 'wood') : null };
+      kn: st.plays === 0 ? (big ? 2 : 1) : 0,
+      chest: st.plays === 0 ? (big ? 'iron' : 'wood') : null };
   }
   st.plays++; st.best = Math.max(st.best || 0, stage.kind === 'game' ? score : Math.round(100 * correct / Math.max(total, 1)));
   st.last = dayKey();
   p.progress[stage.id] = st;
-  if (!p.reviews[stage.topic]) p.reviews[stage.topic] = { step: 0, due: addDays(dayKey(), REVIEW_DAYS[0]) };
+  if (stage.topic && !p.reviews[stage.topic]) p.reviews[stage.topic] = { step: 0, due: addDays(dayKey(), REVIEW_DAYS[0]) };
   const ev = grant(p, r, stage.title);
   return { r, ev, replay: f };
 }

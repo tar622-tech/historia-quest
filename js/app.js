@@ -1,4 +1,5 @@
 import { TOPICS, WORLDS, STAGES, BOSSES, MINIGAMES, BOOKS } from './content.js';
+import './content2.js';
 import { ITEMS, RARITY, SLOTS, CHESTS } from './items.js';
 import * as G from './game.js';
 import * as PX from './pixel.js';
@@ -139,14 +140,14 @@ function viewMap() {
     const st = w.playable ? G.worldStages(w.id) : [];
     const done = st.filter(s => G.stageDone(p, s.id)).length;
     return `<button class="world ${u.ok ? 'open' : 'locked'}" data-act="world" data-id="${w.id}" ${u.ok ? '' : 'aria-disabled="true"'}>
-      ${w.cover ? `<img src="${w.cover}" alt="" loading="lazy">` : '<div class="nocover">?</div>'}
+      ${w.cover ? `<img src="${w.cover}" alt="" loading="lazy">` : `<div class="nocover">${w.badge ? esc(w.badge) : '?'}</div>`}
       <div class="wbody"><span class="muted small">โลกที่ ${w.id}</span><b>${w.name}</b><span class="small">${w.sub}</span>
       ${u.ok ? `<div class="bar"><i style="width:${st.length ? 100 * done / st.length : 0}%"></i></div><span class="small">ผ่าน ${done}/${st.length} ด่าน · ความเชี่ยวชาญ ${G.worldMastery(p, w.id)}%${p.bossWins[w.boss] ? ' · ชนะบอสแล้ว' : ''}</span>`
         : `<ul class="checks">${u.checks.map(c => `<li class="${c.ok ? 'ok' : ''}">${c.ok ? '✔' : '🔒'} ${esc(c.label)}</li>`).join('')}</ul>`}</div></button>`;
   }).join('')}</div></section>`;
 }
 
-const KIND = { manga: 'มังงะ', sheet: 'ใบความรู้', game: 'มินิเกม' };
+const KIND = { manga: 'มังงะ', sheet: 'ใบความรู้', game: 'มินิเกม', lesson: 'บทเรียน', trial: 'ทดสอบ' };
 function viewWorld() {
   const p = S.p, w = WORLDS.find(x => x.id === S.arg);
   const stages = G.worldStages(w.id), b = BOSSES[w.boss];
@@ -227,15 +228,42 @@ function rewardHtml(r, ev = [], extra = '') {
 function viewStage() {
   const s = STAGES.find(x => x.id === S.arg);
   if (s.kind === 'game') return viewGame(s);
-  return `<section class="panel reader"><button class="btn ghost small" data-act="world" data-id="${s.world}">← โลกที่ ${s.world}</button>
-    <h2>${esc(s.title)}</h2><p class="muted small">ที่มา: ${esc(s.src)} · วิชชากร คำสุข</p>
-    <div class="page"><img src="${s.img}" alt="${esc(s.title)}" data-act="zoom"></div>
-    <p class="muted small center">แตะภาพเพื่อขยาย · ${s.kind === 'manga' ? 'ภาพอดีตในเรื่องเป็นภาพจำลองเพื่อช่วยอธิบาย' : 'อ่านให้ครบทุกกล่องก่อนทำภารกิจ'}</p>
+  const back = `<button class="btn ghost small" data-act="world" data-id="${s.world}">← โลกที่ ${s.world}</button>`;
+  if (s.kind === 'trial') return `<section class="panel">${back}<h2>${esc(s.title)}</h2>
+    <p>${s.secret ? 'ภารกิจลับ: คำถามยากจากทุกโลก ต้องเชื่อมโยงความรู้หลายยุค ตอบถูก 4 ข้อขึ้นไปในครั้งแรกได้<b>หีบตำนาน</b>' : 'ทดสอบความจำ 5 ข้อจากโลกนี้ ตอบถูก 3 ข้อขึ้นไปในครั้งแรกได้<b>หีบเงิน</b>'}</p>
+    <p class="small muted">หัวข้อ: ${s.topics.map(t => TOPICS[t].name).slice(0, 8).join(' · ')}${s.topics.length > 8 ? ' และอื่น ๆ' : ''}</p>
+    <div class="row center"><button class="btn primary big" data-act="startMission" data-id="${s.id}">เริ่มทดสอบ</button></div></section>`;
+  const body = s.kind === 'lesson'
+    ? `<article class="lesson">${s.html}</article>`
+    : (s.imgs || [s.img]).map((im, i) => `<div class="page"><img src="${im}" alt="${esc(s.title)} หน้า ${i + 1}" data-act="zoom" loading="lazy"></div>`).join('');
+  const note = s.kind === 'lesson' ? 'บทเรียนนี้เรียบเรียงตามหลักสูตร ครูจะเพิ่มมังงะในภายหลัง'
+    : `แตะภาพเพื่อขยาย · ${s.kind === 'manga' ? 'ภาพอดีตในเรื่องเป็นภาพจำลองเพื่อช่วยอธิบาย' : 'อ่านให้ครบทุกกล่องก่อนทำภารกิจ'}`;
+  return `<section class="panel reader">${back}
+    <h2>${esc(s.title)}</h2><p class="muted small">ที่มา: ${esc(s.src)}${s.kind === 'lesson' ? '' : ' · วิชชากร คำสุข'}</p>
+    ${body}
+    <p class="muted small center">${note}</p>
     <div class="row center"><button class="btn primary big" data-act="startMission" data-id="${s.id}">${s.kind === 'manga' ? 'อ่านจบแล้ว ไปไขปริศนา' : 'ศึกษาแล้ว ไปทำภารกิจ'}</button></div>
   </section>`;
 }
 
+async function runTrial(s) {
+  const p = S.p, qs = [], ex = new Set();
+  // กระจายคำถามจากหลายหัวข้อ
+  const topics = [...s.topics].sort(() => Math.random() - 0.5);
+  for (let i = 0; qs.length < 5 && i < 30; i++) {
+    const [q] = G.pickQuestions(p, [topics[i % topics.length]], 1, { exclude: ex, lv: s.lv });
+    if (q) { qs.push(q); ex.add(q.id); }
+  }
+  let correct = 0;
+  for (let i = 0; i < qs.length; i++) if (await ask(qs[i], { title: `${s.secret ? 'ภารกิจลับ' : 'ทดสอบ'} ${i + 1}/${qs.length}`, where: s.id })) correct++;
+  const res = G.completeStage(p, s, { correct, total: qs.length });
+  save();
+  await showModal(`<h2>${correct >= 3 ? 'ผ่านการทดสอบ!' : 'ยังไม่ผ่าน ลองทบทวนแล้วกลับมาใหม่'}</h2><p>ตอบถูก ${correct}/${qs.length} ข้อ</p>${rewardHtml(res.r, res.ev)}`);
+  go('world', s.world);
+}
+
 async function runMission(s) {
+  if (s.kind === 'trial') return runTrial(s);
   const p = S.p;
   // ปริศนาคั่นหน้า: ต้องตอบถูกจึงผ่าน (เปลี่ยนคำถามเมื่อผิด สูงสุด 3 ครั้ง)
   const used = new Set();
@@ -248,7 +276,9 @@ async function runMission(s) {
   // ภารกิจนักสืบ 3 ข้อ (หัวข้อของด่าน + หัวข้อในโลกเดียวกันที่เคยเรียน)
   const w = WORLDS.find(x => x.id === s.world);
   const learned = w.topics.filter(t => t === s.topic || STAGES.some(st => st.topic === t && st.world === s.world && G.stageDone(p, st.id)));
-  const qs = [...G.pickQuestions(p, [s.topic], 2, { exclude: used }), ...G.pickQuestions(p, learned, 1, { exclude: used })];
+  const qs = G.pickQuestions(p, [s.topic], 2, { exclude: used });
+  qs.forEach(x => used.add(x.id));
+  qs.push(...G.pickQuestions(p, learned, 1, { exclude: used }));
   let correct = 0;
   for (let i = 0; i < qs.length; i++) { if (await ask(qs[i], { title: `ภารกิจนักสืบ ${i + 1}/${qs.length}`, where: s.id })) correct++; }
   const res = G.completeStage(p, s, { correct, total: qs.length });

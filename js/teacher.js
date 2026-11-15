@@ -1,4 +1,5 @@
 import { TOPICS, WORLDS, STAGES } from './content.js';
+import './content2.js';
 import * as G from './game.js';
 import { store, sheetMode } from './store.js';
 import { CONFIG } from './config.js';
