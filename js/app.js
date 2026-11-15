@@ -75,7 +75,7 @@ function header() {
   const p = S.p, L = G.levelInfo(p.xp);
   return `<header class="top"><div class="topin">
     <div class="me"><span class="avatar" data-hero data-scale="3"></span>
-      <div class="who"><b>${esc(p.name)}</b> ${G.isTeacher(p) ? '<span class="pill">บัญชีครู · ปลดล็อกทุกด่าน</span>' : `<span class="small">${esc(p.room)} เลขที่ ${p.number}</span>`}
+      <div class="who"><b>${esc(p.name)}</b> <span class="small">${esc(p.room)} เลขที่ ${p.number}</span>${G.isTeacher(p) ? ' <span class="pill">บัญชีครู · ปลดล็อกทุกด่าน</span>' : ''}
       <div class="lvrow"><span class="lv">LV.${L.level}</span><div class="bar xp"><i style="width:${100 * L.into / L.need}%"></i></div><span class="small">${L.into}/${L.need}</span></div></div></div>
     <div class="wallet">
       <span class="res" title="เหรียญ" data-icon="coin" data-scale="2"><b>${p.coins}</b></span>

@@ -1,6 +1,7 @@
 // กติกาของเกมทั้งหมด (ไม่มีโค้ดหน้าจอในไฟล์นี้)
 import { TOPICS, WORLDS, STAGES, BOSSES, QUESTIONS } from './content.js';
 import { ITEMS, CHESTS } from './items.js';
+import { CONFIG } from './config.js';
 
 export const DEFAULT_SETTINGS = { masteryGate: 80, w3Xp: 600, bossHp: 100, dropBoost: 0 };
 
@@ -183,8 +184,10 @@ export function stageState(p, id) { return p.progress[id] || { plays: 0 }; }
 export function stageDone(p, id) { return (p.progress[id]?.plays || 0) > 0; }
 export function worldStages(worldId) { return STAGES.filter(s => s.world === worldId); }
 
-// บัญชีครู: แถวในชีต Students ที่ช่อง "ห้อง" เป็น "ครู" ปลดล็อกทุกโลก ทุกด่าน ทุกบอส
-export function isTeacher(p) { return String(p?.room || '').trim() === 'ครู'; }
+// บัญชีครู: รหัสอยู่ใน CONFIG.teacherIds หรือช่อง "ห้อง" ในชีตเป็น "ครู" → ปลดล็อกทุกโลก ทุกด่าน ทุกบอส
+export function isTeacher(p) {
+  return String(p?.room || '').trim() === 'ครู' || (CONFIG.teacherIds || []).includes(String(p?.sid || '').trim());
+}
 
 export function stageOpen(p, stage) {
   if (isTeacher(p)) return true;
